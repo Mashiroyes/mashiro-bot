@@ -1,0 +1,38 @@
+{
+    "product": "Y635-L03",
+    "device": "hwY635",
+    "board": "hwY635",
+    "brand": "Huawei",
+    "model": "HUAWEI Y635-L03",
+    "wifi_ssid": "TP-LINK_RKIEYV",
+    "android_id": "7070702",
+    "boot_id": "8542ca9b-adb1-bff3-dffd-f8fede2bd04f",
+    "proc_version": "Linux version 4.5.17-eyvsVIHA (android-build@b1bff3dffdf8.source.android.com)",
+    "mac_address": "85:42:CA:9B:AD:B1",
+    "ip_address": [
+        188,
+        143,
+        7,
+        74
+    ],
+    "imei": "422165488650577",
+    "incremental": "1199809821",
+    "protocol": 1,
+    "display": "7070702",
+    "finger_print": "Huawei/Y635-L03/hwY635:10/7070702/1199809821:user/release-keys",
+    "baseband": "",
+    "sim": "T-Mobile",
+    "os_type": "android",
+    "bootloader": "U-boot",
+    "wifi_bssid": "85:42:CA:9B:AD:B1",
+    "apn": "wifi",
+    "version": {
+        "incremental": "1199809821",
+        "release": "10",
+        "codename": "REL",
+        "sdk": 29
+    },
+    "imsi_md5": "8c02285005bdc0d18436be082a2cb179",
+    "vendor_name": "Huawei",
+    "vendor_os_name": "android"
+}
