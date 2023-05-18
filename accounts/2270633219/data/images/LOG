@@ -1585,3 +1585,13 @@
 16:31:47.736534 table@remove removed @359
 16:31:47.737088 table@remove removed @355
 16:31:47.737088 table@remove removed @354
+=============== May 18, 2023 (CST) ===============
+16:53:01.418513 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:53:01.435851 version@stat F·[0 1] S·15KiB[0B 15KiB] Sc·[0.00 0.00]
+16:53:01.435851 db@open opening
+16:53:01.435851 journal@recovery F·1
+16:53:01.435851 journal@recovery recovering @366
+16:53:01.436379 version@stat F·[0 1] S·15KiB[0B 15KiB] Sc·[0.00 0.00]
+16:53:01.577594 db@janitor F·5 G·1
+16:53:01.577594 db@janitor removing table-365
+16:53:01.578098 db@open done T·142.2471ms
