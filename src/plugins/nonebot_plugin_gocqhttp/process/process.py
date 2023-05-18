@@ -1,6 +1,8 @@
 import asyncio
 import mimetypes
+import os
 import re
+import shutil
 import subprocess
 import threading
 import time
@@ -12,16 +14,14 @@ from typing import Any, Awaitable, Callable, Optional, TypeVar
 import psutil
 from nonebot.utils import escape_tag, run_sync
 
-from nonebot_plugin_gocqhttp.exceptions import ProcessAlreadyStarted
-from nonebot_plugin_gocqhttp.log import LogStorage as BaseLogStorage
-from nonebot_plugin_gocqhttp.log import logger
-from nonebot_plugin_gocqhttp.plugin_config import AccountConfig
-from nonebot_plugin_gocqhttp.process.config import (
-    AccountConfigHelper,
-    AccountDeviceHelper,
-)
-from nonebot_plugin_gocqhttp.process.download import ACCOUNTS_DATA_PATH, BINARY_PATH
-from nonebot_plugin_gocqhttp.process.models import (
+from ..exceptions import ProcessAlreadyStarted
+from ..log import LogStorage as BaseLogStorage
+from ..log import logger
+from ..plugin_config import AccountConfig
+from ..plugin_config import config as plugin_config
+from .config import AccountConfigHelper, AccountDeviceHelper, SessionTokenHelper
+from .download import ACCOUNTS_DATA_PATH, BINARY_PATH
+from .models import (
     ProcessInfo,
     ProcessLog,
     ProcessStatus,
@@ -65,7 +65,6 @@ class GoCQProcess:
         log_rotation: float = 5 * 60,
         post_delay: float = 3,
     ):
-
         self.cwd = (ACCOUNTS_DATA_PATH / str(account.uin)).absolute()
         self.cwd.mkdir(parents=True, exist_ok=True)
 
@@ -75,6 +74,8 @@ class GoCQProcess:
         self.device = AccountDeviceHelper(account)
         if not self.device.exists:
             self.device.generate()
+        self.session = SessionTokenHelper(account)
+
         self.account, self.predefined = account, predefined
 
         self.loop = asyncio.get_running_loop()
@@ -110,10 +111,22 @@ class GoCQProcess:
             process.kill()
 
     def _process_executor(self) -> int:
+        executable_path = BINARY_PATH
+        if plugin_config.PROCESS_EXECUTABLE == "@PATH" and (
+            exec_file := shutil.which(BINARY_PATH.name)
+        ):
+            executable_path = Path(exec_file)
+        elif isinstance(plugin_config.PROCESS_EXECUTABLE, Path):
+            executable_path = plugin_config.PROCESS_EXECUTABLE
+
         self.process = subprocess.Popen(
-            [BINARY_PATH.absolute(), "-faststart"],
+            [executable_path.absolute(), "-faststart"],
             cwd=self.cwd.absolute(),
-            text=False,
+            env={
+                **os.environ,
+                "FORCE_TTY": "true",
+            },  # see: https://github.com/ifrstr/isatty#using-force_tty
+            text=False,  # fix possible encoding error, see: #341
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -123,7 +136,7 @@ class GoCQProcess:
         for output in iter(self.process.stdout.readline, b""):
             output = output.strip().decode("utf-8", "replace")
             if STARTUP_FINISH_PROMPT in output:
-                logger.info(
+                logger.success(
                     "go-cqhttp for "
                     f"<e>{self.account.uin}</e> has successfully started."
                 )

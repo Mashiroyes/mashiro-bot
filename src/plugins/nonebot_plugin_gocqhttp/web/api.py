@@ -1,5 +1,8 @@
+import asyncio
+import base64
 import os
 import shutil
+from datetime import timedelta
 from typing import Any, Dict, List, Optional, cast
 
 import psutil
@@ -9,7 +12,12 @@ from nonebot.adapters.onebot.v11 import ActionFailed, Bot
 from nonebot.utils import escape_tag, run_sync
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from ..exceptions import BotNotFound, ProcessNotFound, RemovePredefinedAccount
+from ..exceptions import (
+    BotNotFound,
+    ProcessNotFound,
+    RemovePredefinedAccount,
+    SessionTokenNotFound,
+)
 from ..log import LOG_STORAGE, logger
 from ..plugin_config import AccountConfig
 from ..process import GoCQProcess, ProcessesManager, ProcessInfo, ProcessLog
@@ -29,13 +37,42 @@ def RunningProcess():
     return Depends(dependency)
 
 
+nickname_map: Dict[int, str] = {}
+
+
 @router.get("/accounts", response_model=List[models.AccountListItem])
-async def all_accounts():
+async def all_accounts(nickname_cache: timedelta = timedelta(minutes=5)):
+    async def get_nickname(bot: Bot):
+        login_info = await bot.get_login_info()
+        user_id, nickname = login_info["user_id"], login_info["nickname"]
+        nickname_map[user_id] = nickname
+        asyncio.get_running_loop().call_later(
+            nickname_cache.total_seconds(), lambda: nickname_map.pop(user_id)
+        )
+
+    await asyncio.gather(
+        *[
+            get_nickname(bot)
+            for bot in get_bots().values()
+            if isinstance(bot, Bot)
+            and not any(bot.self_id.endswith(f"{user_id}") for user_id in nickname_map)
+        ],
+        return_exceptions=True,
+    )
+
     return [
         models.AccountListItem(
             uin=process.account.uin,
             predefined=process.predefined,
-            process_created=not not process.process,
+            process_created=process.process is not None,
+            process_running=(
+                process.process is not None and process.process.returncode is None
+            ),
+            process_connected=any(
+                isinstance(bot, Bot) and bot.self_id.endswith(f"{process.account.uin}")
+                for bot in get_bots().values()
+            ),
+            nickname=nickname_map.get(process.account.uin),
         )
         for process in ProcessesManager.all()
     ]
@@ -146,14 +183,43 @@ def account_device_read(process: GoCQProcess = RunningProcess()):
 
 
 @router.patch("/{uin}/device", response_model=DeviceInfo)
-def account_device_write(data: DeviceInfo, process: GoCQProcess = RunningProcess()):
-    process.device.write(data)
+async def account_device_write(
+    data: DeviceInfo, process: GoCQProcess = RunningProcess()
+):
+    if process.account.protocol != data.protocol:
+        process.account.protocol = data.protocol
+    await run_sync(process.device.write)(data)
+    await ProcessesManager.save()
     return process.device.read()
 
 
 @router.delete("/{uin}/device", status_code=204)
 def account_device_delete(process: GoCQProcess = RunningProcess()):
     process.device.generate()
+
+
+@router.get("/{uin}/session", response_model=models.SessionTokenFile)
+def account_session_read(process: GoCQProcess = RunningProcess()):
+    if not process.session.exists:
+        raise SessionTokenNotFound
+    return models.SessionTokenFile(
+        base64_content=base64.b64encode(process.session.read()).decode()
+    )
+
+
+@router.patch("/{uin}/session", response_model=models.SessionTokenFile)
+def account_session_write(
+    data: models.SessionTokenFile, process: GoCQProcess = RunningProcess()
+):
+    process.session.write(base64.b64decode(data.base64_content))
+    return models.SessionTokenFile(
+        base64_content=base64.b64encode(process.session.read()).decode()
+    )
+
+
+@router.delete("/{uin}/session", status_code=204)
+def account_session_delete(process: GoCQProcess = RunningProcess()):
+    process.session.delete()
 
 
 @router.post("/{uin}/api")

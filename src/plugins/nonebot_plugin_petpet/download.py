@@ -1,13 +1,13 @@
-import json
-import httpx
-import hashlib
 import asyncio
+import hashlib
+import json
 from pathlib import Path
-from nonebot.log import logger
-from nonebot import get_driver
 
+import httpx
+from nonebot import get_driver
+from nonebot.log import logger
 from nonebot_plugin_imageutils import BuildImage
-from nonebot_plugin_imageutils.fonts import add_font, Font
+from nonebot_plugin_imageutils.fonts import Font, add_font
 
 from .config import petpet_config
 
@@ -83,6 +83,6 @@ driver = get_driver()
 
 
 @driver.on_startup
-def _():
+async def _():
     logger.info("正在检查资源文件...")
-    asyncio.ensure_future(check_resources())
+    asyncio.create_task(check_resources())

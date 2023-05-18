@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # mashiro-bot
 
 ## How to start
@@ -11,6 +12,9 @@
 ## Documentation
 
 See [Docs](https://v2.nonebot.dev/)
+=======
+# mashiro-bot
+>>>>>>> c099a0ab4b2ce2403dfd8b6b1776c28a594dd048
 =======
 # mashiro-bot
 >>>>>>> c099a0ab4b2ce2403dfd8b6b1776c28a594dd048

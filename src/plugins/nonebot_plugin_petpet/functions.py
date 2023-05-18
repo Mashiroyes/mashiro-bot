@@ -1,17 +1,17 @@
 import math
 import random
-from typing import Dict
-from datetime import datetime
 from collections import namedtuple
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from datetime import datetime
+from typing import Dict
 
 from nonebot_plugin_imageutils import Text2Image
 from nonebot_plugin_imageutils.fonts import Font
-from nonebot_plugin_imageutils.gradient import LinearGradient, ColorStop
+from nonebot_plugin_imageutils.gradient import ColorStop, LinearGradient
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
-from .utils import *
 from .depends import *
 from .download import load_image
+from .utils import *
 
 TEXT_TOO_LONG = "文字太长了哦，改短点再试吧~"
 NAME_TOO_LONG = "名字太长了哦，改短点再试吧~"
@@ -296,6 +296,34 @@ def always(img: BuildImage = UserImg(), arg=NoArg()):
     return make_jpg_or_gif(img, make)
 
 
+def always_cycle(img: BuildImage = UserImg(), arg=NoArg()):
+    tmp = img.convert("RGBA").resize_width(500)
+    img_h = tmp.height
+    text_h = tmp.resize_width(100).height + tmp.resize_width(20).height + 10
+    text_h = max(text_h, 80)
+    frame_h = img_h + text_h
+    text_frame = BuildImage.new("RGBA", (500, frame_h), "white")
+    text_frame.draw_text(
+        (0, img_h, 280, frame_h), "要我一直", halign="right", max_fontsize=60
+    ).draw_text((400, img_h, 500, frame_h), "吗", halign="left", max_fontsize=60)
+
+    def make(img: BuildImage) -> BuildImage:
+        img = img.resize_width(500)
+        base_frame = text_frame.copy().paste(img, alpha=True)
+        frame = BuildImage.new("RGBA", base_frame.size, "white")
+        r = 1
+        for _ in range(4):
+            x = int(358 * (1 - r))
+            y = int(frame_h * (1 - r))
+            w = int(500 * r)
+            h = int(frame_h * r)
+            frame.paste(base_frame.resize((w, h)), (x, y))
+            r /= 5
+        return frame
+
+    return make_jpg_or_gif(img, make)
+
+
 def always_always(img: BuildImage = UserImg(), arg=NoArg()):
     tmp = img.convert("RGBA").resize_width(500)
     img_h = tmp.height
@@ -368,16 +396,19 @@ def turn(img: BuildImage = UserImg(), arg=NoArg()):
 
 
 def windmill_turn(img: BuildImage = UserImg(), arg=NoArg()):
-    img = img.convert("RGBA").resize((300, 300), keep_ratio=True)
-    frame = BuildImage.new("RGBA", (600, 600), "white")
-    frame.paste(img)
-    frame.paste(img.rotate(90), (0, 300))
-    frame.paste(img.rotate(180), (300, 300))
-    frame.paste(img.rotate(270), (300, 0))
-    frames = [
-        frame.copy().rotate(i).crop((50, 50, 550, 550)).image for i in range(0, 90, 18)
-    ]
-    return save_gif(frames, 0.05)
+    def maker(i: int) -> Maker:
+        def make(img: BuildImage) -> BuildImage:
+            img = img.convert("RGBA").resize((300, 300), keep_ratio=True)
+            frame = BuildImage.new("RGBA", (600, 600), "white")
+            frame.paste(img, alpha=True)
+            frame.paste(img.rotate(90), (0, 300), alpha=True)
+            frame.paste(img.rotate(180), (300, 300), alpha=True)
+            frame.paste(img.rotate(270), (300, 0), alpha=True)
+            return frame.rotate(i * 18).crop((50, 50, 550, 550))
+
+        return make
+
+    return make_gif_or_combined_gif(img, maker, 5, 0.05, FrameAlignPolicy.extend_loop)
 
 
 def littleangel(user: UserInfo = User(), arg: str = Arg()):
@@ -1549,7 +1580,7 @@ def addition(img: BuildImage = UserImg(), arg: str = Arg()):
         frame = expand_frame
 
     def make(img: BuildImage) -> BuildImage:
-        return frame.copy().paste(img.resize((70, 70), keep_ratio=True), (0, 0))
+        return frame.copy().paste(img.resize((91, 91), keep_ratio=True), (0, 0))
 
     return make_jpg_or_gif(img, make)
 
@@ -1868,12 +1899,18 @@ def jiji_king(
     user_imgs: List[BuildImage] = UserImgs(1, 11),
     args: List[str] = Args(0, 11),
 ):
+    img_circle = False
+    if len(args) >= 1 and args[0] == "圆":
+        args.pop(0)
+        img_circle = True
+
     block_num = 5
     if len(user_imgs) >= 7 or len(args) >= 7:
         block_num = max(len(user_imgs), len(args)) - 1
 
     chars = ["急"]
     text = "我是急急国王"
+
     if len(args) == 1:
         if len(user_imgs) == 1:
             chars = [args[0]] * block_num
@@ -1891,9 +1928,10 @@ def jiji_king(
 
     frame = BuildImage.new("RGBA", (10 + 100 * block_num, 400), "white")
     king = load_image("jiji_king/0.png")
-    king.paste(
-        user_imgs[0].convert("RGBA").square().resize((125, 125)), (237, 5), alpha=True
-    )
+    head = user_imgs[0].convert("RGBA").square().resize((125, 125))
+    if img_circle:
+        head = head.circle()
+    king.paste(head, (237, 5), alpha=True)
     frame.paste(king, ((frame.width - king.width) // 2, 0))
 
     if len(user_imgs) > 1:
@@ -2197,7 +2235,7 @@ def dinosaur(img: BuildImage = UserImg(), arg=NoArg()):
 
     def make(img: BuildImage) -> BuildImage:
         return frame.copy().paste(
-            img.resize((612, 376), keep_ratio=True), (310, 483), below=True
+            img.resize((680, 578), keep_ratio=True), (294, 369), below=True
         )
 
     return make_jpg_or_gif(img, make)
@@ -2318,4 +2356,102 @@ def overtime(img: BuildImage = UserImg(), arg=NoArg()):
     frame = load_image("overtime/0.png")
     img = img.convert("RGBA").resize((250, 250), keep_ratio=True)
     frame.paste(img.rotate(-25, expand=True), (165, 220), below=True)
+    return frame.save_jpg()
+
+
+def avatar_formula(img: BuildImage = UserImg(), arg=NoArg()):
+    frame = load_image("avatar_formula/0.png")
+    img_c = img.convert("RGBA").circle().resize((72, 72))
+    img_tp = img.convert("RGBA").circle().resize((51, 51))
+    frame.paste(img_tp, (948, 247))
+    # fmt: off
+    locs = [
+        (143, 32), (155, 148), (334, 149), (275, 266), (486, 266),
+        (258, 383), (439, 382), (343, 539), (577, 487), (296, 717),
+        (535, 717), (64, 896), (340, 896), (578, 897), (210, 1038),
+        (644, 1039), (64, 1192), (460, 1192), (698, 1192), (1036, 141),
+        (1217, 141), (1243, 263), (1140, 378), (1321, 378), (929, 531),
+        (1325, 531), (1592, 531), (1007, 687), (1390, 687), (1631, 686),
+        (1036, 840), (1209, 839), (1447, 839), (1141, 1018), (1309, 1019),
+        (1546, 1019), (1037, 1197), (1317, 1198), (1555, 1197),
+    ]
+    # fmt: on
+    for i in range(39):
+        x, y = locs[i]
+        frame.paste(img_c, (x, y))
+    return frame.save_jpg()
+
+
+def potato(img: BuildImage = UserImg(), arg=NoArg()):
+    frame = load_image("potato/0.png")
+    img = img.convert("RGBA").square().resize((458, 458))
+    frame.paste(img.rotate(-5), (531, 15), below=True)
+    return frame.save_jpg()
+
+
+def printing(img: BuildImage = UserImg(), arg=NoArg()):
+    img = img.convert("RGBA").resize(
+        (304, 174), keep_ratio=True, inside=True, bg_color="white", direction="south"
+    )
+    frames = [load_image(f"printing/{i}.png") for i in range(115)]
+    for i in range(50, 115):
+        frames[i].paste(img, (146, 164), below=True)
+    frames = [frame.image for frame in frames]
+    return save_gif(frames, 0.05)
+
+
+def name_generator(img: BuildImage = UserImg(), arg=NoArg()):
+    colors = ["#0000ff", "#ff00f7", "#00cc66"]
+    # fmt: off
+    el1 = ["废墟", "深海", "反应堆", "学园", "腐烂", "东京", "三维", "四次元", "少管所", "流星", "闪光", "南极", "消极", "幽浮", "网路", "暗狱", "离子态", "液态", "黑色", "抱抱", "暴力", "垃圾", "社会", "残暴", "残酷", "工口", "戮尸", "原味", "毛茸茸", "香香", "霹雳", "午夜", "美工刀", "爆浆", "机关枪", "无响应", "手术台", "麻风病", "虚拟", "速冻", "智能", "2000", "甜味", "华丽", "反社会", "玛利亚", "无", "梦之", "蔷薇", "无政府", "酷酷", "西伯利亚", "人造", "法外", "追杀", "通缉", "女子", "微型", "男子", "超", "毁灭", "大型", "绝望", "阴间", "死亡", "坟场", "高科技", "奇妙", "魔法", "极限", "社会主义", "无聊"]
+    el2 = ["小丑", "仿生", "纳米", "原子", "丧", "电子", "十字架", "咩咩", "赛博", "野猪", "外星", "窒息", "变态", "触手", "小众", "悲情", "飞行", "绿色", "电动", "铁锈", "碎尸", "电音", "蠕动", "酸甜", "虚构", "乱码", "碳水", "内脏", "脑浆", "血管", "全裸", "绷带", "不合格", "光滑", "标本", "酸性", "碱性", "404", "变身", "反常", "樱桃", "碳基", "矫情", "病娇", "进化", "潮湿", "砂糖", "高潮", "变异", "复合盐", "伏特加", "抑郁", "暴躁", "不爱说话", "废物", "失败", "幻想型", "社恐", "苦涩", "粘液", "浓厚", "快乐", "强制", "中二病", "恶魔", "emo", "激光", "发射", "限量版", "迷因", "堕落", "放射性"]
+    el3 = ["天使", "精灵", "女孩", "男孩", "宝贝", "小妈咪", "虫", "菇", "公主", "少女", "少年", "1号机", "子", "恐龙", "蜈蚣", "蟑螂", "食人鱼", "小飞船", "舞女", "桃子", "团子", "精", "酱", "废料", "生物", "物质", "奶茶", "搅拌机", "液", "火锅", "祭司", "体", "实验品", "试验体", "小猫咪", "样本", "颗粒", "血块", "汽水", "蛙", "软体", "机器人", "人质", "小熊", "圣母", "胶囊", "乙女", "主义者", "屑", "垢", "污渍", "废人", "毛血旺", "怪人", "肉", "河豚", "豚", "藻类", "唾沫", "咒语", "建筑", "球", "小狗", "碳", "元素", "少先队员", "博士", "糖"]
+    # fmt: on
+    color = random.choice(colors)
+    name = random.choice(el1) + random.choice(el2) + random.choice(el3)
+    frame = BuildImage.new("RGB", (900, 900), (225, 225, 225))
+    title = load_image("name_generator/title.png").resize((700, 200))
+    frame.paste(title, (100, 0), alpha=True)
+    img = img.convert("RGBA").resize((490, 490), keep_ratio=True)
+    frame.paste(img, (310, 235), alpha=True)
+    frame.draw_text(
+        (20, 450), "您的亚名是", fontsize=40, fill=(105, 105, 105), weight="bold"
+    ).draw_text(
+        (20, 620),
+        name,
+        fontsize=60,
+        fill=color,
+        weight="bold",
+        stroke_ratio=0.07,
+        stroke_fill="white",
+    )
+    return frame.save_jpg()
+
+
+def beat_head(img: BuildImage = UserImg(), arg: str = Arg()):
+    text = "怎么说话呢你" if not arg else arg
+    locs = [(160, 121, 76, 76), (172, 124, 69, 69), (208, 166, 52, 52)]
+    img = img.convert("RGBA")
+    frames: List[IMG] = []
+    for i in range(3):
+        x, y, w, h = locs[i]
+        frame = load_image(f"beat_head/{i}.png")
+        frame.paste(img.resize((w, h)), (x, y), below=True)
+        try:
+            frame.draw_text(
+                (175, 28, 316, 82),
+                text,
+                max_fontsize=50,
+                min_fontsize=10,
+                allow_wrap=True,
+            )
+        except:
+            return TEXT_TOO_LONG
+        frames.append(frame.image)
+    return save_gif(frames, 0.05)
+
+
+def bubble_tea(img: BuildImage = UserImg(), arg=NoArg()):
+    frame = load_image("bubble_tea/0.png")
+    frame.paste(img.convert("RGBA").resize((500, 500), keep_ratio=True), below=True)
     return frame.save_jpg()

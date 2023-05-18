@@ -8,8 +8,11 @@ from ..process import RunningProcessDetail
 
 class AccountListItem(BaseModel):
     uin: int
-    predefined: bool = False
-    process_created: bool = False
+    predefined: bool
+    process_created: bool
+    process_running: bool
+    process_connected: bool
+    nickname: Optional[str] = None
 
 
 class AccountCreation(BaseModel):
@@ -19,6 +22,10 @@ class AccountCreation(BaseModel):
 
 class AccountConfigFile(BaseModel):
     content: str
+
+
+class SessionTokenFile(BaseModel):
+    base64_content: str
 
 
 class StdinInputContent(BaseModel):

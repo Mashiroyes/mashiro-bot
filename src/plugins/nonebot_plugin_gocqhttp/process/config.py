@@ -2,7 +2,9 @@ import json
 from pathlib import Path
 
 import chevron
+
 from nonebot_plugin_gocqhttp.exceptions import BadConfigFormat
+from nonebot_plugin_gocqhttp.plugin_config import config
 
 from ..plugin_config import AccountConfig, driver_config, onebot_config
 from .device import DeviceInfo, random_device
@@ -10,7 +12,11 @@ from .download import ACCOUNTS_DATA_PATH
 
 
 class AccountConfigHelper:
-    CONFIG_TEMPLATE_PATH = Path(__file__).parent / "config-template.yml"
+    CONFIG_TEMPLATE_PATH = (
+        Path(config.CONFIG_TEMPLATE_PATH)
+        if config.CONFIG_TEMPLATE_PATH
+        else Path(__file__).parent / "config-template.yml"
+    )
 
     TEMPLATE_FILE_NAME = "config-template.yml"
     CONFIG_FILE_NAME = "config.yml"
@@ -40,11 +46,16 @@ class AccountConfigHelper:
 
     def before_run(self):
         template_string = self.read()
+        host = (
+            "127.0.0.1"
+            if driver_config.host.is_loopback or driver_config.host.is_unspecified
+            else driver_config.host
+        )
         rendered_string = chevron.render(
             template_string,
             data={
                 "account": self.account,
-                "server_address": f"ws://127.0.0.1:{driver_config.port}/onebot/v11/ws",
+                "server_address": f"ws://{host}:{driver_config.port}/onebot/v11/ws",
                 "access_token": onebot_config.onebot_access_token or "",
             },
         )
@@ -86,3 +97,27 @@ class AccountDeviceHelper:
         device_content = self.read()
         device_content.protocol = self.account.protocol
         return self.write(device_content)
+
+
+class SessionTokenHelper:
+    SESSION_FILE_NAME = "session.token"
+
+    def __init__(self, account: AccountConfig):
+        self.account = account
+        self.account_path = ACCOUNTS_DATA_PATH / str(account.uin)
+        self.account_path.mkdir(parents=True, exist_ok=True)
+
+        self.session_path = self.account_path / self.SESSION_FILE_NAME
+
+    @property
+    def exists(self):
+        return self.session_path.is_file()
+
+    def read(self) -> bytes:
+        return self.session_path.read_bytes()
+
+    def write(self, content: bytes) -> int:
+        return self.session_path.write_bytes(content)
+
+    def delete(self):
+        return self.session_path.unlink()

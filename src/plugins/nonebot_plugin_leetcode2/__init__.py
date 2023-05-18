@@ -1,12 +1,13 @@
 from nonebot import on_command, require, get_bot, get_driver
+from nonebot.log import logger
 from nonebot.typing import T_State
 from nonebot.adapters.onebot.v11 import Bot, Event, MessageSegment
-from nonebot.log import logger
+
+from nonebot_plugin_htmlrender import html_to_pic
+
 from .get_problem_data import *
 from .get_user_data import *
-import os
-require("nonebot_plugin_htmlrender")
-from nonebot_plugin_htmlrender import get_new_page
+
 
 
 request_today = on_command("lc每日",aliases={"lc","leetcode"},priority = 10,block = True)
@@ -19,11 +20,9 @@ request_user = on_command("lc查询",aliases={"lc查询用户","leetcode查询"}
 
 
 try:
-    require("nonebot_plugin_apscheduler")
-    from nonebot_plugin_apscheduler import scheduler
+    scheduler = require("nonebot_plugin_apscheduler").scheduler
 except Exception as e:
-    logger.error("require定时插件时出错，请检查插件加载顺序。若依然不能解决，请修改__init__.py此处并查看错误原因。")
-    # raise e
+    logger.error("[LC查询] require定时插件时出错，请检查插件加载顺序。")
 
 
 
@@ -33,34 +32,15 @@ except Exception as e:
 async def send_today_problem(bot: Bot,event:Event):
     try:
         today_title = get_today_title()
-        logger.info(f"获取今日题目成功，题目为{today_title}.")
+        logger.info(f"[LC查询] 获取今日题目成功，题目为{today_title}.")
         today_data = get_sub_problem_data(today_title)
-        logger.info("获取题目内容成功。")
-        logger.debug(f"题目{today_data[0]}的难度为{today_data[1]},内容略。")
+        logger.info("[LC查询] 获取题目内容成功。")
+        logger.debug(f"[LC查询] 题目{today_data[0]}的难度为{today_data[1]}")
     except Exception as e:
-        logger.error("无法连接至leetcode，请检查网络和网络代理状态。")
+        logger.error("[LC查询] 无法连接至leetcode，请检查网络和网络代理状态。")
         await request_today.finish("连接到leetcode失败...呜呜呜...\n请稍后再试！！")
 
-    ##将html转为图片
-    html_path = f"data/nonebot_plugin_leetcode/html"
-    check_dir(html_path)
-    html_file_path = html_path+f'/{today_title}.html'
-    img_path = f"data/nonebot_plugin_leetcode/img"
-    check_dir(img_path)
-    img_file_path = img_path+f'/{today_title}.png'
-    with open(html_file_path,"w+") as f:
-        f.write(today_data[2])
-    try:
-        async with get_new_page(viewport={"width": 840, "height": 800}) as page:
-                await page.goto(
-                    "file://"+str(os.getcwd())+"/"+html_file_path,
-                    wait_until="networkidle"
-                )
-                pic = await page.screenshot(full_page=True, path=img_file_path)
-    except Exception as e:
-        logger.error("题目内容（html）转图片出错。")
-        await request_today.send("题目内容转图片时出错×")
-        raise e
+    pic = await html_to_pic(today_data[2], viewport={"width": 840, "height": 400})
     await request_today.send("获取今日每日一题成功~加油哦ww\n"+"\n".join(today_data[:2])+MessageSegment.image(pic)+f"\n{today_data[3]}")
 
 
@@ -83,39 +63,20 @@ async def send_today_problem(bot: Bot,event:Event,  state: T_State):
     try:
         search_title = get_search_title(state["keyword"])
         if search_title:
-            logger.info(f"成功搜索到关键字题目，只取第一条，题目为{search_title}.")
+            logger.info(f"[LC查询] 成功搜索到关键字题目，只取第一条，题目为{search_title}.")
         else:
-            logger.info("搜索成功，但并无相关题目。")
+            logger.info("[LC查询] 搜索成功，但并无相关题目。")
             request_search.finish("未搜索到相关题目！！\n要不...换个关键字再搜索一下吧~可为题号、题目、题干内容哒")
 
-        today_data = get_sub_problem_data(search_title)
-        logger.info("获取题目内容成功。")
-        logger.debug(f"题目{today_data[0]}的难度为{today_data[1]},内容略。")
+        data = get_sub_problem_data(search_title)
+        logger.info("[LC查询] 获取题目内容成功。")
+        logger.debug(f"[LC查询] 题目{data[0]}的难度为{data[1]}")
     except Exception as e:
-        logger.error("无法连接至leetcode，请检查网络和网络代理状态。")
+        logger.error("[LC查询] 无法连接至leetcode，请检查网络和网络代理状态。")
         await request_search.finish("连接到leetcode失败...呜呜呜...\n请稍后再试！！")
 
-    ##将html转为图片
-    html_path = f"data/nonebot_plugin_leetcode/html"
-    check_dir(html_path)
-    html_file_path = html_path+f'/{search_title}.html'
-    img_path = f"data/nonebot_plugin_leetcode/img"
-    check_dir(img_path)
-    img_file_path = img_path+f'/{search_title}.png'
-    with open(html_file_path,"w+") as f:
-        f.write(today_data[2])
-    try:
-        async with get_new_page(viewport={"width": 840, "height": 800}) as page:
-                await page.goto(
-                    "file://"+str(os.getcwd())+"/"+html_file_path,
-                    wait_until="networkidle"
-                )
-                pic = await page.screenshot(full_page=True, path=img_file_path)
-    except Exception as e:
-        logger.error("题目内容（html）转图片出错。")
-        await request_search.send("题目内容转图片时出错×")
-        raise e
-    await request_search.send("搜索成功~只发送了最相关题目哦ww\n"+"\n".join(today_data[:2])+MessageSegment.image(pic)+f"\n{today_data[3]}")
+    pic = await html_to_pic(data[2], viewport={"width": 840, "height": 400})
+    await request_search.send("搜索成功~只发送了最相关题目哦ww\n"+"\n".join(data[:2])+MessageSegment.image(pic)+f"\n{data[3]}")
 
 
 
@@ -127,34 +88,15 @@ async def send_today_problem(bot: Bot,event:Event,  state: T_State):
 async def send_random_problem(bot: Bot,event:Event):
     try:
         random_title = get_random_title()
-        logger.info(f"获取随机一题题目成功，题目为{random_title}.")
+        logger.info(f"[LC查询] 获取随机一题题目成功，题目为{random_title}.")
         random_data = get_sub_problem_data(random_title)
-        logger.info("获取题目内容成功。")
-        logger.debug(f"题目{random_data[0]}的难度为{random_data[1]},内容略。")
+        logger.info("[LC查询] 获取题目内容成功。")
+        logger.debug(f"[LC查询] 题目{random_data[0]}的难度为{random_data[1]}")
     except Exception as e:
-        logger.error("无法连接至leetcode，请检查网络和网络代理状态。")
+        logger.error("[LC查询] 无法连接至leetcode，请检查网络和网络代理状态。")
         await request_random.finish("连接到leetcode失败...呜呜呜...\n请稍后再试！！")
 
-    ##将html转为图片
-    html_path = f"data/nonebot_plugin_leetcode/html"
-    check_dir(html_path)
-    html_file_path = html_path+f'/{random_title}.html'
-    img_path = f"data/nonebot_plugin_leetcode/img"
-    check_dir(img_path)
-    img_file_path = img_path+f'/{random_title}.png'
-    with open(html_file_path,"w+") as f:
-        f.write(random_data[2])
-    try:
-        async with get_new_page(viewport={"width": 840, "height": 800}) as page:
-                await page.goto(
-                    "file://"+str(os.getcwd())+"/"+html_file_path,
-                    wait_until="networkidle"
-                )
-                pic = await page.screenshot(full_page=True, path=img_file_path)
-    except Exception as e:
-        logger.error("题目内容（html）转图片出错。")
-        await request_random.send("题目内容转图片时出错×")
-        raise e
+    pic = await html_to_pic(random_data[2], viewport={"width": 840, "height": 400})
     await request_random.send("成功获取随机一题~加油哦ww\n"+"\n".join(random_data[:2])+MessageSegment.image(pic)+f"\n{random_data[3]}")
 
 
@@ -167,25 +109,25 @@ async def send_random_problem(bot: Bot,event:Event):
 async def parse(bot: Bot, event: Event, state: T_State):
     temp = str(event.get_message()).split()
     if temp[1]:
-        state["user_Slug"] = temp[1]
+        state["userSlug"] = temp[1]
 
 
-@request_user.got("user_Slug",prompt="请输出要在leetcode查询的用户哦~\n请写入用户ID，而非用户昵称哦~")
+@request_user.got("userSlug",prompt="请输出要在leetcode查询的用户哦~\n请写入用户ID，而非用户昵称哦~")
 async def send_user_data(bot: Bot,event:Event,  state: T_State):
     try:
         #详细的返回json信息请查阅json/文件夹内的文本，或者参见get_user_data.py
-        user_public_profile = get_user_public_profile(state["user_Slug"])
-        user_question_progress = get_user_question_progress(state["user_Slug"])
-        user_solution_count = get_user_solution_count(state["user_Slug"])
-        user_profile_articles = get_user_profile_articles(state["user_Slug"])
-        user_community_achievement = get_user_community_achievement(state["user_Slug"])
-        user_question_submitstats = get_user_question_submitstats(state["user_Slug"])
-        user_medals = get_user_medals(state["user_Slug"])
+        user_public_profile = get_user_public_profile(state["userSlug"])
+        user_question_progress = get_user_question_progress(state["userSlug"])
+        user_solution_count = get_user_solution_count(state["userSlug"])
+        user_profile_articles = get_user_profile_articles(state["userSlug"])
+        user_community_achievement = get_user_community_achievement(state["userSlug"])
+        user_question_submitstats = get_user_question_submitstats(state["userSlug"])
+        user_medals = get_user_medals(state["userSlug"])
     except Exception as e:
-        logger.error("无法连接至leetcode，请检查网络和网络代理状态。")
+        logger.error("[LC查询] 无法连接至leetcode，请检查网络和网络代理状态。")
         await request_user.finish("连接到leetcode失败...呜呜呜...\n请稍后再试！！")
     try:
-        userSlug = state["user_Slug"]
+        userSlug = state["userSlug"]
         realName = user_public_profile["data"]["userProfilePublicProfile"]["profile"]["realName"]
         userAvatar = httpx.get(user_public_profile["data"]["userProfilePublicProfile"]["profile"]["userAvatar"])
         totalSubmissions = user_public_profile["data"]["userProfilePublicProfile"]["submissionProgress"]["totalSubmissions"]
@@ -194,7 +136,7 @@ async def send_user_data(bot: Bot,event:Event,  state: T_State):
         reSubmissions = user_public_profile["data"]["userProfilePublicProfile"]["submissionProgress"]["reSubmissions"]
         otherSubmissions = user_public_profile["data"]["userProfilePublicProfile"]["submissionProgress"]["otherSubmissions"]
         acTotal = user_public_profile["data"]["userProfilePublicProfile"]["submissionProgress"]["acTotal"]
-        logger.debug("user_public_profile数据解析完成")
+        logger.debug("[LC查询] user_public_profile数据解析完成")
 
         if user_community_achievement["data"]["profileCommunityAchievement"]:
             voteCount = user_community_achievement["data"]["profileCommunityAchievement"][0]["voteCount"]
@@ -202,7 +144,7 @@ async def send_user_data(bot: Bot,event:Event,  state: T_State):
             favoriteCount = user_community_achievement["data"]["profileCommunityAchievement"][0]["favoriteCount"]
         else:
             voteCount,viewCount,favoriteCount = 0,0,0
-        logger.debug("user_community_achievement数据解析完成")
+        logger.debug("[LC查询] user_community_achievement数据解析完成")
 
         numAcceptedQuestions_easy = user_question_progress["data"]["userProfileUserQuestionProgress"]["numAcceptedQuestions"][0]["count"]
         numAcceptedQuestions_medium = user_question_progress["data"]["userProfileUserQuestionProgress"]["numAcceptedQuestions"][1]["count"]
@@ -213,15 +155,15 @@ async def send_user_data(bot: Bot,event:Event,  state: T_State):
         numUntouchedQuestions_easy = user_question_progress["data"]["userProfileUserQuestionProgress"]["numUntouchedQuestions"][0]["count"]
         numUntouchedQuestions_medium = user_question_progress["data"]["userProfileUserQuestionProgress"]["numUntouchedQuestions"][1]["count"]
         numUntouchedQuestions_difficulty = user_question_progress["data"]["userProfileUserQuestionProgress"]["numUntouchedQuestions"][2]["count"]
-        logger.debug("user_question_progress数据解析完成")
+        logger.debug("[LC查询] user_question_progress数据解析完成")
 
         columnsUserSolutionCount = user_solution_count["data"]["columnsUserSolutionCount"]
-        logger.debug("user_solution_count数据解析完成")
+        logger.debug("[LC查询] user_solution_count数据解析完成")
 
         acSubmissionNum_easy = user_question_submitstats["data"]["userProfileUserQuestionSubmitStats"]["acSubmissionNum"][0]["count"]
         acSubmissionNum_medium = user_question_submitstats["data"]["userProfileUserQuestionSubmitStats"]["acSubmissionNum"][1]["count"]
         acSubmissionNum_hard = user_question_submitstats["data"]["userProfileUserQuestionSubmitStats"]["acSubmissionNum"][2]["count"]
-        logger.debug("user_question_submitstats数据解析完成")
+        logger.debug("[LC查询] user_question_submitstats数据解析完成")
 
         if user_medals["data"]["userProfileUserMedals"]:
             latest_madal_name = user_medals["data"]["userProfileUserMedals"][0]["name"]
@@ -229,13 +171,13 @@ async def send_user_data(bot: Bot,event:Event,  state: T_State):
             latest_madal = f"【最近勋章】  勋章名：{latest_madal_name} |获得时间：{latest_madal_date}\n"
         else:
             latest_madal = ""
-        logger.debug("user_medals数据解析完成")
+        logger.debug("[LC查询] user_medals数据解析完成")
 
         if user_profile_articles["data"]["solutionArticles"]["edges"]:
             latest_article_title = f'【最近题解】：{user_profile_articles["data"]["solutionArticles"]["edges"][0]["node"]["title"]}\n'
         else:
             latest_article_title = ""
-        logger.debug("user_profile_articles数据解析完成")
+        logger.debug("[LC查询] user_profile_articles数据解析完成")
 
 
     except Exception as e:
@@ -269,40 +211,21 @@ async def send_leetcode_everyday():
     group_list = get_bot().config.leetcode_qq_groups if hasattr(get_driver().config, "leetcode_qq_groups") else list()
     try:
         today_title = get_today_title()
-        logger.info(f"获取今日题目成功，题目为{today_title}.")
+        logger.info(f"[LC查询] 获取今日题目成功，题目为{today_title}.")
         today_data = get_sub_problem_data(today_title)
-        logger.info("获取题目内容成功。")
-        logger.debug(f"题目{today_data[0]}的难度为{today_data[1]},内容略。")
+        logger.info("[LC查询] 获取题目内容成功。")
+        logger.debug(f"[LC查询] 题目{today_data[0]}的难度为{today_data[1]}")
     except Exception as e:
-        logger.error("无法连接至leetcode，请检查网络和网络代理状态。")
+        logger.error("[LC查询] 无法连接至leetcode，请检查网络和网络代理状态。")
         pass
-    ##将html转为图片
-    html_path = f"data/nonebot_plugin_leetcode/html"
-    check_dir(html_path)
-    html_file_path = html_path+f'/{today_title}.html'
-    img_path = f"data/nonebot_plugin_leetcode/img"
-    check_dir(img_path)
-    img_file_path = img_path+f'/{today_title}.png'
-    with open(html_file_path,"w+") as f:
-        f.write(today_data[2])
-    try:
-        async with get_new_page(viewport={"width": 840, "height": 800}) as page:
-                await page.goto(
-                    "file://"+str(os.getcwd())+"/"+html_file_path,
-                    wait_until="networkidle"
-                )
-                pic = await page.screenshot(full_page=True, path=img_file_path)
-    except Exception as e:
-        logger.error("题目内容（html）转图片出错。")
-        pass
-        raise e
+    pic = await html_to_pic(today_data[2], viewport={"width": 840, "height": 400})
     try:
         for qq in qq_list:
             await get_bot().call_api("send_private_msg",user_id = qq ,message = "获取今日每日一题成功~加油哦ww\n"+"\n".join(today_data[:2])+MessageSegment.image(pic)+f"\n{today_data[3]}")
         for group in group_list:
             await get_bot().call_api("send_group_msg",group_id = group ,message = "获取今日每日一题成功~加油哦ww\n"+"\n".join(today_data[:2])+MessageSegment.image(pic)+f"\n{today_data[3]}")
     except TypeError:
-        logger.error("插件定时发送相关设置有误，请检查.env.*文件。")
+        logger.error("[LC查询] 插件定时发送相关设置有误，请检查.env.*文件。")
 
 
 
@@ -310,15 +233,7 @@ async def send_leetcode_everyday():
 
 try:
     for index, time in enumerate(time_list):
-        scheduler.add_job(send_leetcode_everyday, "cron", hour=time["HOUR"], minute=time["MINUTE"], id=str(index))
-        logger.info(f"新建计划任务成功！！  id:{index},时间为:{time}.")
+        scheduler.add_job(send_leetcode_everyday, "cron", hour=time["HOUR"], minute=time["MINUTE"], id=f"leetcode_{str(index)}")
+        logger.info(f"[LC查询] 新建计划任务成功！！  id:leetcode_{index}，时间为:{time}.")
 except TypeError:
-    logger.error("插件定时发送相关设置有误，请检查.env.*文件。")
-
-
-
-#创建不存在的目录
-def check_dir(path):
-    if not os.path.isdir(path):
-        os.makedirs(path)
-        return "Create Successful."
+    logger.error("[LC查询] 插件定时发送相关设置有误，请检查.env.*文件。")

@@ -1,0 +1,4 @@
+{
+    "go": "https://www.google.com/search?q=%s",
+    "bd": "https://www.baidu.com/s?wd=%s"
+}
