@@ -1,0 +1,49 @@
+{
+    "name": "QQ群聊 语录库",
+    "description": "能够收录群友语录(黑历史)",
+    "usage": "支持OCR识别，关键词搜索 | 一起记录群友的逆天言论吧！",
+    "funcs": [
+        {
+            "func": "上传语录",
+            "trigger_method": "@机器人",
+            "trigger_condition": "上传",
+            "brief_des": "@机器人，发送上传指令，开启上传通道",
+            "detail_des": "@机器人，发送上传指令，开启上传通道"
+        },
+        {
+            "func": "关键词检索群友语录",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "语录 [关键词]",
+            "brief_des": "发送语录+关键词指令，机器人将从语录库中进行查找。若有匹配项，将从匹配项中随机一条发送",
+            "detail_des": "发送语录+关键词指令，机器人将从语录库中进行查找。若有匹配项，将从匹配项中随机一条发送"
+        },
+        {
+            "func": "删除语录",
+            "trigger_method": "@机器人",
+            "trigger_condition": "删除",
+            "brief_des": "回复机器人发出的语录，发送删除指令，机器人将执行删除操作。",
+            "detail_des": "回复机器人发出的语录，发送删除指令，机器人将执行删除操作。"
+        },
+        {
+            "func": "随机发送语录",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "语录",
+            "brief_des": "直接发语录俩字，机器人随机发送一条语录",
+            "detail_des": "直接发语录俩字，机器人随机发送一条语录"
+        },
+        {
+            "func": "增加标签",
+            "trigger_method": "@机器人",
+            "trigger_condition": "addtag [标签]",
+            "brief_des": "回复语录图片，发送addtag+标签（addtag后需加空格，可以多个标签，每个标签之间用空格分隔），为指定语录增加额外标签",
+            "detail_des": "回复语录图片，发送addtag+标签（addtag后需加空格，可以多个标签，每个标签之间用空格分隔），为指定语录增加额外标签"
+        },
+        {
+            "func": "删除标签",
+            "trigger_method": "@机器人",
+            "trigger_condition": "deltag [标签]",
+            "brief_des": "回复语录图片，发送deltag+标签（deltag后需加空格，可以多个标签，每个标签之间用空格分隔），为指定语录删除不需要的标签",
+            "detail_des": "回复语录图片，发送deltag+标签（deltag后需加空格，可以多个标签，每个标签之间用空格分隔），为指定语录删除不需要的标签"
+        }
+    ]
+}

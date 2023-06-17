@@ -1,0 +1,28 @@
+{
+    "name": "在线搜索引擎",
+    "description": "返回在线搜索结果",
+    "usage": "用于指引群友快速访问谷歌娘；前缀：搜索引擎的代号，例如谷歌娘叫go，百度娘叫bd",
+    "funcs": [
+        {
+            "func": "查询",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "?前缀 关键词",
+            "brief_des": "快速搜索想查询的内容，例子：?go nitro+就能用谷歌搜索nitro+",
+            "detail_des": "快速搜索想查询的内容，例子：?go nitro+就能用谷歌搜索nitro+"
+        },
+        {
+            "func": "搜索引擎列表",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "search.list",
+            "brief_des": "查看搜索引擎列表",
+            "detail_des": "查看搜索引擎列表"
+        },
+        {
+            "func": "快速添加(全局)搜索引擎",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "search.add(.global) [预置的搜索引擎名称] [自定义前缀（可选）]",
+            "brief_des": "search.add google就可以添加谷歌搜索引擎了，.global代表是否全局设置",
+            "detail_des": "search.add google就可以添加谷歌搜索引擎了，.global代表是否全局设置"
+        }
+    ]
+}

@@ -2,7 +2,7 @@
 # 以三个`{}`包裹的为模板项, 请不要修改
 
 account: # 账号相关
-  password: "" # 密码为空时使用扫码登录
+  password: "lxy520520" # 密码为空时使用扫码登录
   encrypt: false # 是否开启密码加密
   status: 0 # 在线状态 请参考 https://docs.go-cqhttp.org/guide/config.html#在线状态
 

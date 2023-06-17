@@ -22,6 +22,7 @@ headers = {
     'Accept-Language': 'zh-CN,zh;q=0.9',
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive',
+    'Cookie': '',
     'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryB0NrMSYMfjY5r0l1',
     'Host': 'exhentai.org',
     'Origin': 'https://exhentai.org',

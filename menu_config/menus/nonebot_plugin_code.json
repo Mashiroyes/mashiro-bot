@@ -1,0 +1,14 @@
+{
+    "name": "在线运行代码",
+    "description": "支持python，c，c++等等",
+    "usage": "能够让机器人自动返回代码运行结果",
+    "funcs": [
+        {
+            "func": "代码运行",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "code [语言] [inputText] 换行 [代码]",
+            "brief_des": "运行代码示例(python)(有输入)：code py 你好 (换行) print(input())",
+            "detail_des": "运行代码示例(python)(有输入)：code py 你好 (换行) print(input())"
+        }
+    ]
+}

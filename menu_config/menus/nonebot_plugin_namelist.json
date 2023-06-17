@@ -1,0 +1,28 @@
+{
+    "name": "黑白名单",
+    "description": "简易黑白用户名单管理插件，可在黑名单与白名单模式中互相切换。",
+    "usage": "黑名单模式下，机器人不会响应来自黑名单用户的消息。白名单模式下，机器人不会响应白名单用户之外的消息。超级用户不受黑白名单影响。",
+    "funcs": [
+        {
+            "func": "添加黑名单/删除黑名单",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "添加黑名单+@用户 / 删除黑名单+@用户",
+            "brief_des": "将被艾特的用户  加入黑名单/从黑名单删除",
+            "detail_des": "将被艾特的用户  加入黑名单/从黑名单删除"
+        },
+       {
+            "func": "查看黑名单",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "查看黑名单+@用户",
+            "brief_des": "查看黑名单中的用户",
+            "detail_des": "查看黑名单中的用户"
+        },
+        {
+            "func": "添加白名单/删除白名单",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "添加白名单+@用户 / 删除白名单+@用户",
+            "brief_des": "将被艾特的用户  加入白名单/从白名单删除",
+            "detail_des": "将被艾特的用户  加入白名单/从白名单删除"
+        }
+    ]
+}

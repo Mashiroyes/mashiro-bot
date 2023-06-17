@@ -1,0 +1,35 @@
+{
+    "name": "简易群管",
+    "description": "简易群聊管理插件",
+    "usage": "简易群聊管理插件，只有管理员和群主可以使用以下功能，可以用来鉴黄(没接入，感觉没啥必要",
+    "funcs": [
+        {
+            "func": "禁言;解禁;全群禁言;全群解禁",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "禁 @某人 时间(min) ; 解 @某人 ; /all ; /all 解",
+            "brief_des": "禁言和解禁",
+            "detail_des": "禁言和解禁"
+        },
+       {
+            "func": "踢人/踢出并拉黑",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "踢 @某人/黑 @某人",
+            "brief_des": "踢人",
+            "detail_des": "踢人"
+        },
+        {
+            "func": "撤回",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "撤回 (回复某条消息即可撤回对应消息)",
+            "brief_des": "撤回 @user [(可选，默认n=19)历史消息倍数n] ",
+            "detail_des": "撤回 @user [(可选，默认n=19)历史消息倍数n] "
+        },
+        {
+            "func": "腾讯云图片安全api",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "配置项中添加",
+            "brief_des": "tenid=str tenkeys=str callback_notice=true # 是否开启踢人禁言等操作的成功提示【不添加则默认关闭】",
+            "detail_des": "tenid=str tenkeys=str callback_notice=true # 是否开启踢人禁言等操作的成功提示【不添加则默认关闭】"
+        }
+    ]
+}

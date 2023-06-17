@@ -1,0 +1,21 @@
+{
+    "name": "ACM_Reminder",
+    "description": "订阅牛客/CF平台的比赛信息",
+    "usage": "contest.list 获取所有/CF/牛客平台的比赛信息 contest.subscribe 订阅CF/牛客平台的比赛信息",
+    "funcs": [
+        {
+            "func": "获取比赛信息",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "contest.list",
+            "brief_des": "获取CF/牛客平台的比赛信息",
+            "detail_des": "获取CF/牛客平台的比赛信息"
+        },
+       {
+            "func": "订阅比赛信息",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "contest.subscribe",
+            "brief_des": "订阅CF/牛客平台的比赛信息",
+            "detail_des": "订阅CF/牛客平台的比赛信息"
+        }
+    ]
+}

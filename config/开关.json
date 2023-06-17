@@ -1,1 +1,166 @@
-{"287445187": {"admin": true, "requests": true, "wordcloud": true, "auto_ban": false, "img_check": false, "word_analyze": true, "welcome": true}, "390547347": {"admin": true, "requests": true, "wordcloud": true, "auto_ban": false, "img_check": false, "word_analyze": true, "welcome": true}, "649626007": {"admin": true, "requests": true, "wordcloud": true, "auto_ban": false, "img_check": false, "word_analyze": true, "welcome": true}, "730472056": {"admin": true, "requests": true, "wordcloud": true, "auto_ban": false, "img_check": false, "word_analyze": true, "welcome": true}}
+{
+  "287445187": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "welcome": true
+  },
+  "390547347": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "welcome": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "649626007": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "welcome": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "730472056": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "welcome": true
+  },
+  "105246608": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "212021495": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "567925958": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "580936701": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "647371096": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "688689439": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "754745132": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "780754965": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "787248895": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  },
+  "644410326": {
+    "admin": true,
+    "requests": true,
+    "wordcloud": true,
+    "auto_ban": false,
+    "img_check": false,
+    "word_analyze": true,
+    "group_msg": false,
+    "broadcast": true,
+    "particular_e_notice": false,
+    "group_recall": false
+  }
+}

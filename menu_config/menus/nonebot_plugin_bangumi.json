@@ -1,0 +1,14 @@
+{
+    "name": "bangumi机器人",
+    "description": "能够使用bangumi查询功能",
+    "usage": "这是一个能够使用bangumi查询功能的智障插件(bushi",
+    "funcs": [
+        {
+            "func": "查询bangumi条目",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "bgm",
+            "brief_des": "发起查询功能",
+            "detail_des": "发起查询功能"
+        }
+    ]
+}

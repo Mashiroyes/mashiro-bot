@@ -1,0 +1,14 @@
+{
+    "name": "AutoRepeater",
+    "description": "复读机",
+    "usage": "连续发送2条相同消息，机器人就会自动+1。包括普通消息，QQ表情，还有图片（表情包）。支持图片夹文字和表情夹文字的消息!",
+    "funcs": [
+        {
+            "func": "自动复读设置",
+            "trigger_method": "on_cmd",
+            "trigger_condition": "自动复读开启/关闭",
+            "brief_des": "控制机器人在当前群是否进行复读，可由管理员、群主和Superuser控制，默认关闭",
+            "detail_des": "控制机器人在当前群是否进行复读，可由管理员、群主和Superuser控制，默认关闭"
+        }
+    ]
+}
